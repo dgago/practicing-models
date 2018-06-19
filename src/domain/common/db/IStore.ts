@@ -1,6 +1,7 @@
-import { IResults } from "./results";
+import { IResults } from "./IResults";
+import { Entity } from "../components/Entity";
 
-export interface IStore<T, K> {
+export interface IStore<T extends Entity<K>, K> {
   // async methods
   findOne(id: K): Promise<T>;
   find(): Promise<IResults<T>>;
@@ -16,11 +17,4 @@ export interface IStore<T, K> {
   createSync(item: T): K;
   updateSync(id: K, item: T): void;
   deleteSync(id: K): void;
-}
-
-/**
- * Behavior interface for methods
- */
-export interface IStorable<T, K> {
-  store: IStore<T, K>;
 }

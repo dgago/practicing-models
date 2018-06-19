@@ -1,4 +1,4 @@
-import { IStore, IStorable } from "../../db/store";
+import { IStore, IStorable } from "../../domain/common/db/IStore";
 import { IFlow, IFlowable } from "../flows/models/flowinstance";
 import { IIdentificable } from "../common/models/identificable";
 

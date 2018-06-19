@@ -1,5 +1,5 @@
 import { IFlow, IFlowable } from "./models/flowinstance";
-import { IStore } from "../../db/store";
+import { IStore } from "../../domain/common/db/IStore";
 import {
   IFlowDefinition,
   IFlowState,
