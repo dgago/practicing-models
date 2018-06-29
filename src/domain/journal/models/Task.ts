@@ -1,19 +1,18 @@
 import { ValueObject } from "../../common/components/ValueObject";
 
 export class Task extends ValueObject {
-  private _desc: string;
-  private _status: TaskStatus;
-
   constructor(desc: string, status: TaskStatus) {
     super();
     this._desc = desc;
     this._status = status;
   }
 
+  private _desc: string;
   get desc(): string {
     return this._desc;
   }
 
+  private _status: TaskStatus;
   get status(): TaskStatus {
     return this._status;
   }

@@ -1,11 +1,18 @@
-import * as _ from "lodash";
 import * as joi from "joi";
+import * as _ from "lodash";
 import { Entity } from "../../common/components/Entity";
 import { Appointment } from "../models/Appointment";
 import { Note } from "../models/Note";
 import { Task, TaskStatus } from "../models/Task";
 
 export class DayEntity extends Entity<string> {
+  /**
+   * getId
+   */
+  public static getId(tenantId: string, date: Date) {
+    return `${tenantId}${date.getDate()}`;
+  }
+
   private _tasks: Task[];
   private _appointments: Appointment[];
   private _notes: Note[];

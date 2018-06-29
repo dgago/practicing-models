@@ -1,7 +1,7 @@
 import { IDomainEvent } from "./IDomainEvent";
 
 export class DomainEventPublisher {
-  private _subscribers: IDomainEventSubscriber<IDomainEvent>[] = [];
+  private _subscribers: Array<IDomainEventSubscriber<IDomainEvent>> = [];
   private _publishing = false;
 
   public publish<T extends IDomainEvent>(domainEvent: T): void {
@@ -12,15 +12,15 @@ export class DomainEventPublisher {
     try {
       this._publishing = true;
 
-      let eventType = typeof domainEvent;
+      const eventType = typeof domainEvent;
       for (const subscriber of this._subscribers) {
-        let subscribedToType = subscriber.subscribedToEventType();
-        if (
-          (typeof(eventType) instanceof subscribedToType) ||
-          (subscribedToType instanceof IDomainEvent)
-        ) {
-          subscriber.handleEvent(domainEvent);
-        }
+        const subscribedToType = subscriber.subscribedToEventType();
+        // if (
+        //   (typeof(eventType) instanceof subscribedToType) ||
+        //   (subscribedToType instanceof IDomainEvent)
+        // ) {
+        //   subscriber.handleEvent(domainEvent);
+        // }
       }
     } finally {
       this._publishing = false;
