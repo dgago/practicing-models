@@ -1,6 +1,6 @@
-import { IStore, IStorable } from "../../domain/common/db/IStore";
-import { IFlow, IFlowable } from "../flows/models/flowinstance";
+import { IStore } from "../../domain/core/data/store";
 import { IIdentificable } from "../common/models/identificable";
+import { IFlow, IFlowable } from "../flows/models/flowinstance";
 
 export class Document
   implements IIdentificable, IFlowable<Document>, IStorable<Document, string> {
