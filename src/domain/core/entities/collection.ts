@@ -1,7 +1,8 @@
 import { Entity } from "./entity";
+import { ValueObject } from "./value-object";
 
-export class Collection<T extends Entity<K>, K> {
-  private _items: T[];
+export class Collection<T extends Entity<K> | ValueObject, K> {
+  protected _items: T[];
 
   public get items() {
     return this._items;
