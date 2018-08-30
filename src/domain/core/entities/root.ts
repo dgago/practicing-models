@@ -1,10 +1,9 @@
 import { DomainEvent } from "../events/domain-event.vo";
-import { Entity } from "./entity";
 
-export class Root<K> extends Entity<K> {
+export class Root {
   private _events: DomainEvent[] = [];
 
-  get events() {
+  get events(): ReadonlyArray<DomainEvent> {
     return this._events;
   }
 

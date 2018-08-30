@@ -4,14 +4,19 @@ import { ValueObject } from "../../../../core/entities/value-object";
  * ContextProcess
  */
 export class ContextProcess extends ValueObject {
-  constructor() {
+  constructor(
+    private _code: string,
+    private _name: string,
+    private _username: string,
+    private _objectives: string,
+    private _scope: string
+  ) {
     super();
   }
 
   /**
    * code
    */
-  private _code: string;
   public get code(): string {
     return this._code;
   }
@@ -19,7 +24,6 @@ export class ContextProcess extends ValueObject {
   /**
    * name
    */
-  private _name: string;
   public get name(): string {
     return this._name;
   }
@@ -27,7 +31,6 @@ export class ContextProcess extends ValueObject {
   /**
    * username
    */
-  private _username: string;
   public get username(): string {
     return this._username;
   }
@@ -35,7 +38,6 @@ export class ContextProcess extends ValueObject {
   /**
    * objectives
    */
-  private _objectives: string;
   public get objectives(): string {
     return this._objectives;
   }
@@ -43,7 +45,6 @@ export class ContextProcess extends ValueObject {
   /**
    * scope
    */
-  private _scope: string;
   public get scope(): string {
     return this._scope;
   }

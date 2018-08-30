@@ -4,14 +4,21 @@ import { ValueObject } from "../../../../core/entities/value-object";
  * ContextInterestedParty
  */
 export class ContextInterestedParty extends ValueObject {
-  constructor() {
+  constructor(
+    private _name: string,
+    private _type: ContextInterestedPartyType,
+    private _canStopOperations: boolean,
+    private _canAlterProcessOrProduct: boolean,
+    private _isStrategic: boolean,
+    private _requirements: string[],
+    private _processes: string[]
+  ) {
     super();
   }
 
   /**
    * name
    */
-  private _name: string;
   public get name(): string {
     return this._name;
   }
@@ -19,7 +26,6 @@ export class ContextInterestedParty extends ValueObject {
   /**
    * type
    */
-  private _type: ContextInterestedPartyType;
   public get type(): ContextInterestedPartyType {
     return this._type;
   }
@@ -27,7 +33,6 @@ export class ContextInterestedParty extends ValueObject {
   /**
    * canStopOperations
    */
-  private _canStopOperations: boolean;
   public get canStopOperations(): boolean {
     return this._canStopOperations;
   }
@@ -35,7 +40,6 @@ export class ContextInterestedParty extends ValueObject {
   /**
    * canAlterProcessOrProduct
    */
-  private _canAlterProcessOrProduct: boolean;
   public get canAlterProcessOrProduct(): boolean {
     return this._canAlterProcessOrProduct;
   }
@@ -43,7 +47,6 @@ export class ContextInterestedParty extends ValueObject {
   /**
    * isStrategic
    */
-  private _isStrategic: boolean;
   public get isStrategic(): boolean {
     return this._isStrategic;
   }
@@ -51,16 +54,14 @@ export class ContextInterestedParty extends ValueObject {
   /**
    * requirements
    */
-  private _requirements: string[];
-  public get requirements(): string[] {
+  public get requirements(): ReadonlyArray<string> {
     return this._requirements;
   }
 
   /**
    * processes
    */
-  private _processes: string[];
-  public get processes(): string[] {
+  public get processes(): ReadonlyArray<string> {
     return this._processes;
   }
 }

@@ -3,13 +3,10 @@ import { IMapper } from "./mapper";
 import { IStore } from "./store";
 
 export class Repo<T extends Entity<K>, D extends Entity<K>, K> {
-  protected _mapper: IMapper<T, D, K>;
-  protected _store: IStore<D, K>;
-
-  constructor(store: IStore<D, K>, mapper: IMapper<T, D, K>) {
-    this._store = store;
-    this._mapper = mapper;
-  }
+  constructor(
+    protected _store: IStore<D, K>,
+    protected _mapper: IMapper<T, D, K>
+  ) {}
 
   public async findOne(id: K): Promise<T> {
     const item = await this._store.findOne(id);

@@ -4,7 +4,7 @@ import { ValueObject } from "./value-object";
 export class Collection<T extends Entity<K> | ValueObject, K> {
   protected _items: T[];
 
-  public get items() {
+  public get items(): ReadonlyArray<T> {
     return this._items;
   }
 

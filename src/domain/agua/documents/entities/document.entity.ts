@@ -1,35 +1,29 @@
 import * as joi from "joi";
-import { Root } from "../../../core/entities/root";
-import { DocumentModified } from "./events/document-version-added.event";
+import { Entity } from "../../../core/entities/entity";
 import { DocumentCopy } from "./models/document-copy.vo";
 import { DocumentEventType } from "./models/document-event.vo";
 import { DocumentUpdateCheck } from "./models/document-update-check.vo";
 import { File } from "./models/file.vo";
 
 /**
- * DocumentRoot
+ * Document
  */
-export class DocumentRoot extends Root<string> {
+export class Document extends Entity<string> {
   constructor(
     id: string,
-    name: string,
-    file: File,
-    source: DocumentSource,
-    updateCheckFrequency: string
+    private _code: string,
+    private _name: string,
+    private _file: File,
+    private _source: DocumentSource
   ) {
     super(id);
 
-    // TODO: arreglar este constructor
-    this._name = name;
-    this._file = file;
-    this._source = source;
-    this._updateCheckFrequency = updateCheckFrequency;
+    this._status = DocumentStatus.Draft;
   }
 
   /**
    * code
    */
-  private _code: string;
   public get code(): string {
     return this._code;
   }
@@ -37,9 +31,22 @@ export class DocumentRoot extends Root<string> {
   /**
    * name
    */
-  private _name: string;
   public get name(): string {
     return this._name;
+  }
+
+  /**
+   * file
+   */
+  public get file(): File {
+    return this._file;
+  }
+
+  /**
+   * source
+   */
+  public get source(): DocumentSource {
+    return this._source;
   }
 
   /**
@@ -59,43 +66,35 @@ export class DocumentRoot extends Root<string> {
   }
 
   /**
-   * file
-   */
-  private _file: File;
-  public get file(): File {
-    return this._file;
-  }
-
-  /**
    * versions
    */
-  private _versions: File[];
-  public get versions(): File[] {
+  private _versions: File[] = [];
+  public get versions(): ReadonlyArray<File> {
     return this._versions;
   }
 
   /**
    * copies
    */
-  private _copies: DocumentCopy[];
-  public get copies(): DocumentCopy[] {
+  private _copies: DocumentCopy[] = [];
+  public get copies(): ReadonlyArray<DocumentCopy> {
     return this._copies;
   }
 
   /**
    * documentEvents
    */
-  private _documentEvents: DocumentEventType;
-  public get documentEvents(): DocumentEventType {
+  private _documentEvents: DocumentEventType[] = [];
+  public get documentEvents(): ReadonlyArray<DocumentEventType> {
     return this._documentEvents;
   }
 
   /**
-   * source
+   * updateChecks
    */
-  private _source: DocumentSource;
-  public get source(): DocumentSource {
-    return this._source;
+  private _updateChecks: DocumentUpdateCheck[] = [];
+  public get updateChecks(): ReadonlyArray<DocumentUpdateCheck> {
+    return this._updateChecks;
   }
 
   /**
@@ -104,14 +103,6 @@ export class DocumentRoot extends Root<string> {
   private _updateCheckFrequency: string;
   public get updateCheckFrequency(): string {
     return this._updateCheckFrequency;
-  }
-
-  /**
-   * updateChecks
-   */
-  private _updateChecks: DocumentUpdateCheck[];
-  public get updateChecks(): DocumentUpdateCheck[] {
-    return this._updateChecks;
   }
 
   /**
@@ -127,8 +118,6 @@ export class DocumentRoot extends Root<string> {
 
     this._versions.push(this._file);
     this._file = item;
-
-    this.addEvent(new DocumentModified(this));
   }
 
   /**
@@ -140,8 +129,6 @@ export class DocumentRoot extends Root<string> {
     joi.assert(item.type, joi.required());
 
     this._copies.push(item);
-
-    this.addEvent(new DocumentModified(this));
   }
 
   /**
@@ -153,8 +140,19 @@ export class DocumentRoot extends Root<string> {
     joi.assert(item.comments, joi.string());
 
     this._updateChecks.push(item);
+  }
 
-    this.addEvent(new DocumentModified(this));
+  /**
+   * publish
+   */
+  public publish() {
+    if (this._status !== DocumentStatus.Revised) {
+      throw new Error(
+        "No es posible publicar este documento, ya que no ha sido revisado."
+      );
+    }
+
+    this._status = DocumentStatus.Published;
   }
 }
 

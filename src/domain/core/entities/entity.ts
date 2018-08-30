@@ -1,14 +1,11 @@
 import bcrypt = require("bcrypt");
 
 export class Entity<K> {
-  constructor(id: K) {
-    this._id = id;
-  }
+  constructor(private _id: K) {}
 
   /**
    * id
    */
-  private _id: K;
   public get id(): K {
     return this._id;
   }
