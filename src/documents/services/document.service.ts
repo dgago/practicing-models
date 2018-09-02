@@ -1,8 +1,8 @@
 import { DomainService } from "../../core/services/domain-service";
 import { File } from "../entities/document/models/file.vo";
-import { IPrincipal } from "./commands/create-document.command";
-import { Tenant } from "./tenant.service";
+import { IPrincipal } from "./commands/principal";
 import { Process } from "./process.service";
+import { Tenant } from "./tenant.service";
 
 export class DocumentDomainService extends DomainService {
   /**
@@ -17,6 +17,7 @@ export class DocumentDomainService extends DomainService {
    * Determina si un usuario puede crear un documento.
    * @param tenant Inquilino de la cuenta.
    * @param user Usuario autenticado.
+   * @param process Proceso asociado al documento.
    */
   canCreateDocument(tenant: Tenant, user: IPrincipal, process: Process): void {
     throw new Error("Method not implemented.");
@@ -26,8 +27,39 @@ export class DocumentDomainService extends DomainService {
    * Determina si un usuario puede actualizar un documento.
    * @param tenant Inquilino de la cuenta.
    * @param user Usuario autenticado.
+   * @param process Proceso asociado al documento.
    */
   canUpdateDocument(tenant: Tenant, user: IPrincipal, process: Process): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * Determina si un usuario puede revisar un documento.
+   * @param tenant Inquilino de la cuenta.
+   * @param user Usuario autenticado.
+   * @param process Proceso asociado al documento.
+   */
+  canReviewDocument(tenant: Tenant, user: IPrincipal, process: Process): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * Determina si un usuario puede aprobar un documento.
+   * @param tenant Inquilino de la cuenta.
+   * @param user Usuario autenticado.
+   * @param process Proceso asociado al documento.
+   */
+  canApproveDocument(tenant: Tenant, user: IPrincipal, process: Process): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * Determina si un usuario puede publicar un documento.
+   * @param tenant Inquilino de la cuenta.
+   * @param user Usuario autenticado.
+   * @param process Proceso asociado al documento.
+   */
+  canPublishDocument(tenant: Tenant, user: IPrincipal, process: Process): void {
     throw new Error("Method not implemented.");
   }
 }

@@ -1,13 +1,13 @@
 import { Repo } from "../../core/data/repo";
 import { AppService } from "../../core/services/app-service";
 import { DocumentRoot } from "../entities/document/document.entity";
-import { DocumentEventType } from "../entities/document/models/document-event.vo";
 import { File } from "../entities/document/models/file.vo";
 import { CreateDocumentCommand } from "./commands/create-document.command";
+import { DocumentCommand } from "./commands/document-command";
+import { UpdateDocumentCommand } from "./commands/update-document.command";
 import { DocumentDomainService } from "./document.service";
 import { Process, ProcessDomainService } from "./process.service";
 import { Tenant, TenantDomainService } from "./tenant.service";
-import { UpdateDocumentCommand } from "./commands/update-document.command";
 
 export class DocumentApplicationService extends AppService {
   private _documentService: DocumentDomainService;
@@ -55,7 +55,7 @@ export class DocumentApplicationService extends AppService {
 
     const documentId = this._documentRepo.create(item);
 
-    // TODO: publish
+    // TODO: publish events
 
     return documentId;
   }
@@ -84,6 +84,8 @@ export class DocumentApplicationService extends AppService {
     this._documentService.canUpdateDocument(tenant, command.user, process);
 
     const item = this._documentRepo.findOneSync(command.documentId);
+    this._documentService.itemMustExist(item);
+
     item.update(
       command.user.username,
       command.name,
@@ -99,7 +101,38 @@ export class DocumentApplicationService extends AppService {
 
     const res = this._documentRepo.update(command.documentId, item);
 
-    // TODO: publish
+    // TODO: publish events
+
+    return res;
+  }
+
+  /**
+   * publishDocument
+   */
+  public async publishDocument(command: DocumentCommand) {
+    const tenant: Tenant = await this._tenantService.getTenant(
+      command.user,
+      command.user.tenantId
+    );
+
+    const item = this._documentRepo.findOneSync(command.documentId);
+    this._documentService.itemMustExist(item);
+
+    const process: Process = await this._processService.getProcess(
+      command.user,
+      command.user.tenantId,
+      item.processId
+    );
+
+    // TODO: verificar si es neceario el proceso, para no obtener el documento
+    // antes de chequear si el usuario puede publicarlo.
+    this._documentService.canPublishDocument(tenant, command.user, process);
+
+    item.publish(command.user.username);
+
+    const res = this._documentRepo.update(command.documentId, item);
+
+    // TODO: publish events
 
     return res;
   }

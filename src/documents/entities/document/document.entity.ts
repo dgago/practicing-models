@@ -5,6 +5,7 @@ import { DocumentCopy } from "./models/document-copy.vo";
 import { DocumentEvent, DocumentEventType } from "./models/document-event.vo";
 import { DocumentUpdateCheck } from "./models/document-update-check.vo";
 import { File } from "./models/file.vo";
+import { DocumentStatusChangedEvent } from "../../events/document-status-changed.event";
 
 /**
  * Document
@@ -226,6 +227,8 @@ export class DocumentRoot extends AggregateRoot<string> {
       throw new Error(`El objeto tiene un formato incorrecto: ${result.value}`);
     }
 
+    // TODO: No se puede actualizar un documento obsoleto
+
     this.addDocumentEvent(
       username,
       "Documento actualizado.",
@@ -240,11 +243,19 @@ export class DocumentRoot extends AggregateRoot<string> {
    * publish
    */
   public publish(username: string) {
-    if (this._status !== DocumentStatus.Revised) {
+    if (this._status !== DocumentStatus.Approved) {
       throw new Error(
-        "No es posible publicar este documento, ya que no ha sido revisado."
+        "No es posible publicar este documento, ya que no ha sido aprobado."
       );
     }
+
+    if (this._approvalUsername !== username) {
+      throw new Error(
+        `El usuario "${username}" no ha sido designado para publicar este documento.`
+      );
+    }
+
+    // TODO: No se puede publicar un documento vencido (?)
 
     this._status = DocumentStatus.Published;
 

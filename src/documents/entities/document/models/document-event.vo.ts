@@ -1,6 +1,5 @@
-import { ValueObject } from "../../../../core/entities/value-object";
-
 import * as Joi from "joi";
+import { ValueObject } from "../../../../core/entities/value-object";
 
 /**
  * DocumentEvent
