@@ -3,27 +3,18 @@ import { ValueObject } from "../../../core/entities/value-object";
 import { IPrincipal } from "./principal";
 
 /**
- * DocumentCommand
+ * FlowCommand
  */
-export class DocumentCommand extends ValueObject {
+export class FlowCommand extends ValueObject {
   /**
    * Esquema de validación.
    */
   private _schema = Joi.object().keys({
-    user: Joi.object().keys({
-      tenantId: Joi.string()
-        .alphanum()
-        .max(256)
-        .required(),
-      username: Joi.string()
-        .alphanum()
-        .max(256)
-        .required()
-    }),
-    documentId: Joi.string()
+    name: Joi.string()
       .alphanum()
       .max(256)
-      .required()
+      .required(),
+    date: Joi.date().required()
   });
 
   /**
@@ -47,10 +38,26 @@ export class DocumentCommand extends ValueObject {
   }
 
   /**
-   * documentId
+   * flowId
    */
-  private _documentId: string;
-  public get documentId(): string {
-    return this._documentId;
+  private _flowId: string;
+  public get flowId(): string {
+    return this._flowId;
+  }
+
+  /**
+   * instanceId
+   */
+  private _instanceId: string;
+  public get instanceId(): string {
+    return this._instanceId;
+  }
+
+  /**
+   * data
+   */
+  private _data: any;
+  public get data(): any {
+    return this._data;
   }
 }

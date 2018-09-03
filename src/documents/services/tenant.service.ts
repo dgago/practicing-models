@@ -1,23 +1,34 @@
 import * as Joi from "joi";
-import { Entity } from "../../core/entities/entity";
+import { Repo } from "../../core/data/repo";
+import { AggregateRoot } from "../../core/entities/aggregate-root";
 import { DomainService } from "../../core/services/domain-service";
-import { IPrincipal } from "./commands/create-document.command";
+import { IPrincipal } from "./commands/principal";
 
 export class TenantDomainService extends DomainService {
+  private _tenantRepo: Repo<TenantRoot, TenantRoot, string>;
+
   /**
    * Obtiene un inquilino.
    */
-  public getTenant(user: IPrincipal, id: string): Promise<Tenant> {
+  public async getTenant(
+    user: IPrincipal,
+    tenantId: string
+  ): Promise<TenantRoot> {
+    this.notFalsy(user, "user");
+    this.notFalsy(tenantId, "tenantId");
+
+    const tenant = await this._tenantRepo.findOne(tenantId);
+
     // TODO: validar si el usuario puede ver el inquilino solicitado.
 
-    return;
+    return tenant;
   }
 }
 
 /**
  * Tenant
  */
-export class Tenant extends Entity<string> {
+export class TenantRoot extends AggregateRoot<string> {
   /**
    * Esquema de validación.
    */

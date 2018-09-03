@@ -1,42 +1,56 @@
 import { Repo } from "../../core/data/repo";
 import { AppService } from "../../core/services/app-service";
+import { FlowInstance } from "../../flows/entities/flow/models/flow-instance.vo";
 import { DocumentRoot } from "../entities/document/document.entity";
 import { File } from "../entities/document/models/file.vo";
-import { CreateDocumentCommand } from "./commands/create-document.command";
-import { DocumentCommand } from "./commands/document-command";
-import { UpdateDocumentCommand } from "./commands/update-document.command";
+import { CreateDocumentCommand } from "./commands/create-document.cmd";
+import { DocumentCommand } from "./commands/document.cmd";
+import { UpdateDocumentCommand } from "./commands/update-document.cmd";
 import { DocumentDomainService } from "./document.service";
+import { FlowDomainService } from "./flow.service";
 import { Process, ProcessDomainService } from "./process.service";
-import { Tenant, TenantDomainService } from "./tenant.service";
+import { TenantDomainService, TenantRoot } from "./tenant.service";
 
 export class DocumentApplicationService extends AppService {
   private _documentService: DocumentDomainService;
   private _processService: ProcessDomainService;
   private _tenantService: TenantDomainService;
+  private _flowService: FlowDomainService;
   private _documentRepo: Repo<DocumentRoot, DocumentRoot, string>;
 
   /**
    * createDocument
    */
   public async createDocument(command: CreateDocumentCommand): Promise<string> {
-    const tenant: Tenant = await this._tenantService.getTenant(
+    this.notFalsy(command, "command");
+
+    const tenant: TenantRoot = await this._tenantService.getTenant(
       command.user,
       command.user.tenantId
     );
+    this.notFalsy(tenant, "tenant");
 
     const file: File = await this._documentService.getFile(
+      tenant,
       command.user,
-      command.user.tenantId,
       command.fileId
     );
+    this.notFalsy(file, "file");
 
     const process: Process = await this._processService.getProcess(
+      tenant,
       command.user,
-      command.user.tenantId,
       command.processId
     );
+    this.notFalsy(process, "process");
 
     this._documentService.canCreateDocument(tenant, command.user, process);
+
+    const flowInstance: FlowInstance = await this._flowService.createInstance(
+      tenant,
+      command.user,
+      process.publishingFlowId
+    );
 
     const item = new DocumentRoot(
       null,
@@ -46,11 +60,12 @@ export class DocumentApplicationService extends AppService {
       file,
       command.source,
       command.processId,
-      process.revisionUsername,
+      process.reviewUsername,
       process.approvalUsername,
       process.publishingUsername,
-      process.comments,
-      process.copies.slice()
+      command.comments,
+      command.copies.slice(),
+      flowInstance
     );
 
     const documentId = this._documentRepo.create(item);
@@ -64,27 +79,33 @@ export class DocumentApplicationService extends AppService {
    * updateDocument
    */
   public async updateDocument(command: UpdateDocumentCommand) {
-    const tenant: Tenant = await this._tenantService.getTenant(
+    this.notFalsy(command, "command");
+
+    const tenant: TenantRoot = await this._tenantService.getTenant(
       command.user,
       command.user.tenantId
     );
+    this.notFalsy(tenant, "tenant");
 
+    // TODO: y si no está subiendo un archivo nuevo?
     const file: File = await this._documentService.getFile(
+      tenant,
       command.user,
-      command.user.tenantId,
       command.fileId
     );
+    this.notFalsy(file, "file");
 
     const process: Process = await this._processService.getProcess(
+      tenant,
       command.user,
-      command.user.tenantId,
       command.processId
     );
+    this.notFalsy(process, "process");
 
     this._documentService.canUpdateDocument(tenant, command.user, process);
 
     const item = this._documentRepo.findOneSync(command.documentId);
-    this._documentService.itemMustExist(item);
+    this.notFalsy(item, "item");
 
     item.update(
       command.user.username,
@@ -92,7 +113,7 @@ export class DocumentApplicationService extends AppService {
       file,
       command.source,
       command.processId,
-      process.revisionUsername,
+      process.reviewUsername,
       process.approvalUsername,
       process.publishingUsername,
       command.comments,
@@ -107,28 +128,23 @@ export class DocumentApplicationService extends AppService {
   }
 
   /**
-   * publishDocument
+   * changeDocumentStatus
    */
-  public async publishDocument(command: DocumentCommand) {
-    const tenant: Tenant = await this._tenantService.getTenant(
+  public async changeDocumentStatus(command: DocumentCommand) {
+    this.notFalsy(command, "command");
+
+    const tenant: TenantRoot = await this._tenantService.getTenant(
       command.user,
       command.user.tenantId
     );
+    this.notFalsy(tenant, "tenant");
 
     const item = this._documentRepo.findOneSync(command.documentId);
-    this._documentService.itemMustExist(item);
+    this.notFalsy(item, "item");
 
-    const process: Process = await this._processService.getProcess(
-      command.user,
-      command.user.tenantId,
-      item.processId
-    );
+    this._flowService.canRaiseEvent(tenant, command.user, item.flow);
 
-    // TODO: verificar si es neceario el proceso, para no obtener el documento
-    // antes de chequear si el usuario puede publicarlo.
-    this._documentService.canPublishDocument(tenant, command.user, process);
-
-    item.publish(command.user.username);
+    item.changeStatus(command.user.username, command.status, command.comments);
 
     const res = this._documentRepo.update(command.documentId, item);
 

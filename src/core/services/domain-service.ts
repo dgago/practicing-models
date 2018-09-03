@@ -1,9 +1,12 @@
-import { Entity } from "../entities/entity";
+import { ArgumentError } from "../errors/argument.error";
 
 export class DomainService {
-  public itemMustExist<K>(item: Entity<K>) {
+  public notFalsy(item: any, name: string = null) {
     if (!item) {
-      throw new Error(`El registro no existe.`);
+      const message = name
+        ? `El argumento ${name} debe tener un valor.`
+        : `El argumento debe tener un valor.`;
+      throw new ArgumentError(message);
     }
   }
 }

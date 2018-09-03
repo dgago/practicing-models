@@ -6,6 +6,9 @@ import { DocumentEvent, DocumentEventType } from "./models/document-event.vo";
 import { DocumentUpdateCheck } from "./models/document-update-check.vo";
 import { File } from "./models/file.vo";
 import { DocumentStatusChangedEvent } from "../../events/document-status-changed.event";
+import { FlowInstance } from "../../../flows/entities/flow/models/flow-instance.vo";
+import { DocumentTask, DocumentTaskStatus } from "./models/document-task.vo";
+import { ArgumentError } from "../../../core/errors/argument.error";
 
 /**
  * Document
@@ -32,11 +35,12 @@ export class DocumentRoot extends AggregateRoot<string> {
     private _file: File,
     private _source: DocumentSource,
     private _processId: string,
-    private _revisionUsername: string,
+    private _reviewUsername: string,
     private _approvalUsername: string,
     private _publishingUsername: string,
     private _comments: string,
-    private _copies: DocumentCopy[]
+    private _copies: DocumentCopy[],
+    private _flow: FlowInstance
   ) {
     super(id);
 
@@ -131,8 +135,8 @@ export class DocumentRoot extends AggregateRoot<string> {
   /**
    * versions
    */
-  private _versions: File[];
-  public get versions(): ReadonlyArray<File> {
+  private _versions: DocumentRoot[];
+  public get versions(): ReadonlyArray<DocumentRoot> {
     return this._versions.slice();
   }
 
@@ -168,10 +172,10 @@ export class DocumentRoot extends AggregateRoot<string> {
   }
 
   /**
-   * revisionUsername
+   * reviewUsername
    */
-  public get revisionUsername(): string {
-    return this._revisionUsername;
+  public get reviewUsername(): string {
+    return this._reviewUsername;
   }
 
   /**
@@ -197,6 +201,21 @@ export class DocumentRoot extends AggregateRoot<string> {
   }
 
   /**
+   * flow
+   */
+  public get flow(): FlowInstance {
+    return this._flow;
+  }
+
+  /**
+   * tasks
+   */
+  private _tasks: DocumentTask[];
+  public get tasks(): ReadonlyArray<DocumentTask> {
+    return this._tasks.slice();
+  }
+
+  /**
    * Modifica un documento.
    */
   update(
@@ -205,7 +224,7 @@ export class DocumentRoot extends AggregateRoot<string> {
     file: File,
     source: DocumentSource,
     processId: string,
-    revisionUsername: string,
+    reviewUsername: string,
     approvalUsername: string,
     publishingUsername: string,
     comments: string,
@@ -215,7 +234,7 @@ export class DocumentRoot extends AggregateRoot<string> {
     this._file = file;
     this._source = source;
     this._processId = processId;
-    this._revisionUsername = revisionUsername;
+    this._reviewUsername = reviewUsername;
     this._approvalUsername = approvalUsername;
     this._publishingUsername = publishingUsername;
     this._publishingUsername = publishingUsername;
@@ -240,48 +259,34 @@ export class DocumentRoot extends AggregateRoot<string> {
   }
 
   /**
-   * publish
+   * changeStatus
    */
-  public publish(username: string) {
-    if (this._status !== DocumentStatus.Approved) {
-      throw new Error(
-        "No es posible publicar este documento, ya que no ha sido aprobado."
+  changeStatus(
+    username: string,
+    status: DocumentStatus,
+    comments: string
+  ): any {
+    // TODO: podría enviarlo también alguien con permisos (?)
+    const task = this.tasks.find(
+      (x) => x.status === status && x.taskStatus === DocumentTaskStatus.Pending
+    );
+    if (!task) {
+      throw new ArgumentError(
+        `El documento no puede cambiar al estado ${status}.`
       );
     }
 
-    if (this._approvalUsername !== username) {
-      throw new Error(
-        `El usuario "${username}" no ha sido designado para publicar este documento.`
-      );
-    }
-
-    // TODO: No se puede publicar un documento vencido (?)
-
-    this._status = DocumentStatus.Published;
+    this._status = status;
+    this._comments = comments;
 
     this.addDocumentEvent(
       username,
-      "Documento publicado.",
-      DocumentEventType.Published,
+      `Cambia a estado ${status}`,
+      DocumentEventType.StatusChanged,
       new Date()
     );
 
     this.addEvent(new DocumentStatusChangedEvent(this));
-  }
-
-  /**
-   * addVersion
-   */
-  private addVersion(
-    name: string,
-    contentType: string,
-    provider: string,
-    length: number,
-    pages: number = 1
-  ) {
-    const item: File = new File(name, contentType, provider, length, pages);
-    this._versions.push(this._file);
-    this._file = item;
   }
 
   /**
@@ -319,8 +324,8 @@ export enum DocumentSource {
  */
 export enum DocumentStatus {
   Draft,
-  InRevision,
-  Revised,
+  InReview,
+  Reviewed,
   Approved,
   Published,
   Archived

@@ -1,18 +1,22 @@
 import * as Joi from "joi";
 import { Entity } from "../../core/entities/entity";
 import { DomainService } from "../../core/services/domain-service";
-import { IPrincipal } from "./commands/create-document.command";
-import { DocumentCopy } from "../entities/document/models/document-copy.vo";
+import { IPrincipal } from "./commands/principal";
+import { TenantRoot } from "./tenant.service";
 
 export class ProcessDomainService extends DomainService {
   /**
    * Obtiene un proceso.
    */
   public getProcess(
+    tenant: TenantRoot,
     user: IPrincipal,
-    tenantId: string,
     processId: string
   ): Promise<Process> {
+    this.notFalsy(tenant, "tenant");
+    this.notFalsy(user, "user");
+    this.notFalsy(processId, "processId");
+
     // TODO: validar si el usuario puede ver el proceso solicitado.
 
     return;
@@ -35,15 +39,18 @@ export class Process extends Entity<string> {
       .alphanum()
       .max(256)
       .required(),
-    revisionUsername: Joi.string()
+    reviewUsername: Joi.string()
       .alphanum()
       .max(256)
       .required(),
     approvalUsername: Joi.string()
       .alphanum()
       .max(256)
+      .required(),
+    publishingUsername: Joi.string()
+      .alphanum()
+      .max(256)
       .required()
-    // date: Joi.date().required()
   });
 
   /**
@@ -75,11 +82,11 @@ export class Process extends Entity<string> {
   }
 
   /**
-   * revisionUsername
+   * reviewUsername
    */
-  private _revisionUsername: string;
-  public get revisionUsername(): string {
-    return this._revisionUsername;
+  private _reviewUsername: string;
+  public get reviewUsername(): string {
+    return this._reviewUsername;
   }
 
   /**
@@ -99,18 +106,10 @@ export class Process extends Entity<string> {
   }
 
   /**
-   * comments
+   * publishingFlowId
    */
-  private _comments: string;
-  public get comments(): string {
-    return this._comments;
-  }
-
-  /**
-   * copies
-   */
-  private _copies: DocumentCopy[];
-  public get copies(): ReadonlyArray<DocumentCopy> {
-    return this._copies.slice();
+  private _publishingFlowId: string;
+  public get publishingFlowId(): string {
+    return this._publishingFlowId;
   }
 }

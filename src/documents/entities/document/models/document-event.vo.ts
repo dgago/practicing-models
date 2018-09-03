@@ -75,10 +75,7 @@ export class DocumentEvent extends ValueObject {
  */
 export enum DocumentEventType {
   Created,
-  SentForRevision,
-  Revised,
-  Approved,
-  Published,
+  StatusChanged,
   Archived,
   Updated
 }
